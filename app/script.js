@@ -2,25 +2,24 @@ var inputScore = function (StudentNumber, StudentScore, Assignments) {
     //document.getElementsByClassName("assignments")[0].rows[0].cells[7].children[0].textContent = "100";
 	var foundName = false;
     var students = document.getElementsByClassName("assignments")[0].rows;
-    for (var i=0; i<=Assignments.length;i++){
+    for (var i=0; i<Assignments.length;i++){
 	    for (var row = 0; row < students.length; row++) {
-	        for (var sn = 0; sn < students[row].attributes.length; sn++) {
+            for (var sn = 0; sn < students[row].attributes.length; sn++) {
 	            if (students[row].attributes[sn].name == "data-sn" &&
 	                students[row].attributes[sn].value == StudentNumber) {
 	                foundName = true;
 	                    var assignments = students[row].cells;
 	                    for (var an = 0; an < assignments.length; an++) {
-	                        for (var attr = 0; attr < assignments[an].attributes.length; attr++) {
+                            for (var attr = 0; attr < assignments[an].attributes.length; attr++) {
 	                            if (assignments[an].attributes[attr].name == "data-an" &&
-	                                assignments[an].attributes[attr].value == Assignments[i]) {
-	
-	                                assignments[an].children[0].textContent = StudentScore[i];
+	                                assignments[an].attributes[attr].value == Assignments[i].trim()) {
+
+                                    assignments[an].children[0].textContent = StudentScore[i];
 	                                assignments[an].dispatchEvent(new MouseEvent("click", {
 	                                    "view": window,
 	                                    "bubbles": true,
 	                                    "cancelable": false
-	                                }));
-	                                assignments[an].dispatchEvent(new Event("keypress", {which: 13}));
+                                    }));
 	                            }
 	                        }
 	                    }
@@ -28,6 +27,19 @@ var inputScore = function (StudentNumber, StudentScore, Assignments) {
 	        }
 	    }
     }
+
+    //Hacky nonsense to get Aeries to trigger their score updating
+    document.getElementsByClassName("assignments")[0].rows[1].cells[0].dispatchEvent(new MouseEvent("click", {
+                                                                                            "view": window,
+                                                                                            "bubbles": true,
+                                                                                            "cancelable": false
+    }));
+    document.getElementsByClassName("assignments")[0].rows[0].cells[0].dispatchEvent(new MouseEvent("click", {
+        "view": window,
+        "bubbles": true,
+        "cancelable": false
+    }));
+
     if (!foundName) {
         var notFound = "Could not find student numbers:\n";
         notFound += StudentNumber;
@@ -39,47 +51,35 @@ var inputScore = function (StudentNumber, StudentScore, Assignments) {
     else {
         return "";
     }
-    //for (var ID in ScoresTable) {
-    //    if(self["AN"+ID+"_"+Assignment]) {
-    //        self["AN"+ID+"_"+Assignment].value = ScoresTable[ID];
-    //    } else {
-    //        notFound += ID;
-    //        notFound += " -> ";
-    //        notFound += ScoresTable[ID];
-    //        notFound += "\n";
-    //    }
-    //}
-    //if (notFound.length > 35) {window.alert(notFound)};
 };
 
 var createScoresTable = function (scores, identtype) {
     if(identtype == 'StuNum') {
         return scores;
-    } else if(identtype == 'StuName') {
+    } else if(identtype == 'StuLastFirst' || identtype == 'StuFullName') {
         var notFound = "Could not find:\n";
         var roster = getRoster();
         var scoresTable = [];
         for ( var i in scores) {
-            var lastName = scores[i].lastName;
-            var firstName = scores[i].firstName;
+            var name = scores[i].Name;
             var foundName = false;
             for ( j in roster) {
                 var rosterName = roster[j].StuName.split(", ");
-                if ( lastName == rosterName[0] && firstName == rosterName[1] ||
-                     firstName == rosterName[0] && lastName == rosterName[1]) {
+                rosterName[1] = rosterName[1].split(" ")[0];
+                if ( name.includes(rosterName[0]) && name.includes(rosterName[1])) {
                     scoresTable.push({ StuNum: roster[j].StuNum, Score: scores[i].Score });
                     foundName = true;
+                    break;
                 }
             }
             if (!foundName) {
-                notFound += lastName + ", " + firstName;
+                notFound += name;
                 notFound += ", Score: ";
                 notFound += scores[i].Score;
                 notFound += "\n";
             }
         }
         if (notFound.length > 18) { window.alert(notFound) };
-        //console.log(scoresTable);
         return scoresTable;
     } else {
         return scores;  // for Permanent ID, not implemented

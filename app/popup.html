@@ -40,13 +40,14 @@
     <form id="importscores" name="importscores">
         <p>
             <label for="StuName"><b>Student Identification Type</b></label> <br />
-            <input type="radio" id="StuName" name="idtype" value="StuName" checked> Student Name
+            <input type="radio" id="StuFullName" name="idtype" value="StuFullName" checked> Full Name
+            <input type="radio" id="StuLastFirst" name="idtype" value="StuLastFirst"> Last Name, First Name
             <input type="radio" id="StuNum" name="idtype" value="StuNum"> Student Number
-            <input type="radio" id="PermID" name="idtype" value="PermID" disabled> Perm. ID (Not working)
         </p>
         <p>
             <label for="scores"><b>Students and Scores list [tab-delimited or comma-delimited]</b><br />
             Use a header row with: Last Name, First Name, Assignment #, Assignment #, etc.<br />
+            Full Name, Assignment #, Assignment #, etc.<br />
             Or: Student Number, Assignment #, Assignment #, etc<br />
             Followed by a row for each student to import data for<br /><br />
             <i>Example:</i><br />

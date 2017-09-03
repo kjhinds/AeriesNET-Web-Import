@@ -1,6 +1,8 @@
 function importScores() {
-    if (document.getElementById('StuName').checked) {
-        var identType = 'StuName';
+    if (document.getElementById('StuFullName').checked) {
+        var identType = 'StuFullName';
+    } else if (document.getElementById('StuLastFirst').checked) {
+        var identType = 'StuLastFirst';
     } else if (document.getElementById('StuNum').checked) {
         var identType = 'StuNum';
     } else {
@@ -19,11 +21,11 @@ function importScores() {
 function getAssignments(scores, identType) {
 	var scoresArray = scores.split("\n");
 	var assignments = scoresArray[0].split(/\t|,/);
-	if (identType == 'StuName') {
+	if (identType == 'StuLastFirst') {
 		assignments.splice(0,2);
 	}
-	else if (identType == 'StuNum') {
-		assignments.splice(0,1);
+	else if (identType == 'StuNum' || identType == 'StuFullName') {
+        assignments.splice(0, 1);
 	}
 	return assignments;
 }
@@ -31,20 +33,34 @@ function getAssignments(scores, identType) {
 function repackScores(scores, identType) {
     var scoresObject = {};
     var scoresArray = scores.split("\n");
-    if (identType == 'StuName') {
+    if (identType == 'StuLastFirst') {
         for (i = 1; i < scoresArray.length; i++) {
             if (scoresArray[i]) {
                 var student = scoresArray[i].split(/\t|,/);
-                var lastName = student[0].trim();
-                var firstName = student[1].trim();
+                var name = student[1].trim() + " " + student[0].trim();
                 var score = [];
                 for (j = 2; j < student.length; j++){
                 	score.push(student[j].trim());
                 }
                 scoresObject[i] = 
-                    {lastName: lastName,
-                        firstName: firstName,
+                    {Name: name,
                         Score: score};
+            };
+        };
+    } else if (identType == 'StuFullName') {
+        for (i = 1; i < scoresArray.length; i++) {
+            if (scoresArray[i]) {
+                var student = scoresArray[i].split(/\t|,/);
+                var name = student[0];
+                var score = [];
+                for (j = 1; j < student.length; j++) {
+                    score.push(student[j].trim());
+                }
+                scoresObject[i] =
+                    {
+                        Name: name,
+                        Score: score
+                    };
             };
         };
     } else if (identType == 'StuNum') {
