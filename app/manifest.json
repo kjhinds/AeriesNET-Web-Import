@@ -20,6 +20,6 @@
       "matches": ["https://teacherportal.abcusd.us/Aeries.Net/gradebook/*/*/*"]
     }
   ],
-  "version": "1.6",
+  "version": "1.7",
   "web_accessible_resources":  ["script.js","popup.js","roster.js","roster.html"]
 }

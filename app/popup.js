@@ -15,7 +15,7 @@ function importScores() {
         command: "import"
     };
     sendToContentScript(dataObj);
-    sendToContentScript({ command: "getRoster" });  //I don't understand why I need to do this to get it to work.
+    //sendToContentScript({ command: "getRoster" });  //I don't understand why I need to do this to get it to work.  Or maybe I don't anymore?
 };
 
 function getAssignments(scores, identType) {
@@ -37,7 +37,7 @@ function repackScores(scores, identType) {
         for (i = 1; i < scoresArray.length; i++) {
             if (scoresArray[i]) {
                 var student = scoresArray[i].split(/\t|,/);
-                var name = student[1].trim() + " " + student[0].trim();
+                var name = student[1].trim().toLowerCase() + " " + student[0].trim().toLowerCase();
                 var score = [];
                 for (j = 2; j < student.length; j++){
                 	score.push(student[j].trim());
@@ -51,7 +51,7 @@ function repackScores(scores, identType) {
         for (i = 1; i < scoresArray.length; i++) {
             if (scoresArray[i]) {
                 var student = scoresArray[i].split(/\t|,/);
-                var name = student[0];
+                var name = student[0].trim().toLowerCase();
                 var score = [];
                 for (j = 1; j < student.length; j++) {
                     score.push(student[j].trim());
