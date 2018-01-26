@@ -1,80 +1,46 @@
-var inputScore = function (StudentNumber, StudentScore, Assignments) {
+var inputScore = function (StudentNumber, StudentScore, Assignments, Skip) {
     //document.getElementsByClassName("assignments")[0].rows[0].cells[7].children[0].textContent = "100";
     var lastColumnVisted = 0;
     var lastRowVisited = 0;
     var foundName = false;
     var students = document.getElementsByClassName("assignments")[0].rows;
-    for (var i = 0; i < Assignments.length; i++) {
-        var empty = true;
-        var assignmentColumn = null;
-        for (var j = 0; j < students[0].cells.length; j++) {
-            var readAssignment = students[0].cells[j].getAttribute("data-an");
-            if (readAssignment == Assignments[i].trim()) {
-                assignmentColumn = j;
-            }
-        }
-        if (assignmentColumn == null) {
-            window.alert("Could not find assignment " + Assignments[i] + ". Skipping.")
-            continue
-        }
-        for (var j = 0; j < students.length - 1; j++) {
-            console.log(students[j].cells[assignmentColumn].children[0].textContent)
-            console.log(students[j].cells[assignmentColumn].getAttribute("data-is-notapplicable"))
-            if (students[j].cells[assignmentColumn].children[0].textContent != '' &&
-                students[j].cells[assignmentColumn].getAttribute("data-is-notapplicable") == "False") {
-                empty = false;
-            }
-        }
-        if (!empty) {
-            empty = window.confirm("Overwrite data in Assignment " + Assignments[i] + "?")
-        }
-        console.log(empty);
-        if (empty) {
+    for (var i = 0; i < Assignments.length; i++)
+    {
+        if (!Skip.includes(Assignments[i]))
+        {
             for (var row = 0; row < students.length; row++) {
-                for (var sn = 0; sn < students[row].attributes.length; sn++) {
-                    if (students[row].attributes[sn].name == "data-sn" &&
-                        students[row].attributes[sn].value == StudentNumber) {
-                        foundName = true;
-                        var assignments = students[row].cells;
-                        for (var an = 0; an < assignments.length; an++) {
-                            for (var attr = 0; attr < assignments[an].attributes.length; attr++) {
-                                if (assignments[an].attributes[attr].name == "data-an" &&
-                                    assignments[an].attributes[attr].value == Assignments[i].trim()) {
-
-                                    assignments[an].children[0].textContent = StudentScore[i];
-                                    assignments[an].dispatchEvent(new MouseEvent("click", {
-                                        "view": window,
-                                        "bubbles": true,
-                                        "cancelable": false
-                                    }));
-                                    lastColumnVisted = an;
-                                    lastRowVisited = row;
-                                }
-                            }
+                if (students[row].getAttribute("data-sn") == StudentNumber) {
+                    foundName = true;
+                    var assignmentsList = students[row].cells;
+                    for (var an = 0; an < assignmentsList.length; an++) {
+                        if (assignmentsList[an].getAttribute("data-an") == Assignments[i].trim()) {
+                            assignmentsList[an].children[0].textContent = StudentScore[i];
+                            assignmentsList[an].dispatchEvent(new MouseEvent("click", {
+                                "view": window,
+                                "bubbles": true,
+                                "cancelable": false
+                            }));
+                            lastColumnVisted = an;
+                            lastRowVisited = row;
                         }
+
                     }
                 }
-            }
 
+            }
         }
-        
     }
 
     //Hacky nonsense to get Aeries to trigger their score updating
     if (lastRowVisited == 0) lastRowVisited = 1;
-    document.getElementsByClassName("assignments")[0].rows[lastRowVisited-1].cells[lastColumnVisted].dispatchEvent(new MouseEvent("click", {
-        "view": window,
-        "bubbles": true,
-        "cancelable": false
-    }));
-    document.getElementsByClassName("assignments")[0].rows[lastRowVisited].cells[lastColumnVisted].dispatchEvent(new MouseEvent("click", {
+    students[lastRowVisited-1].cells[lastColumnVisted].dispatchEvent(new MouseEvent("click", {
         "view": window,
         "bubbles": true,
         "cancelable": false
     }));
 
     if (!foundName) {
-        var notFound = "Skipped following student numbers:\n";
+        var notFound = "Student number: ";
         notFound += StudentNumber;
         notFound += ", Score: ";
         notFound += StudentScore;
@@ -170,13 +136,45 @@ var sendToContentScript = function(message, command){
 var handleImport = function (scores, identType, assignments) {
     var scoresTable = createScoresTable(scores, identType);
     var notFoundList = "";
+    var assignmentsSkipped = [];
+    for (var i = 0; i < assignments.length; i++) {
+        if (!isAssignmentEmpty(assignments[i])) {
+            assignmentsSkipped.push(assignments[i]);
+        }
+    }
     for (var student in scoresTable) {
-        notFoundList += inputScore(scoresTable[student].StuNum, scoresTable[student].Score, assignments);
+        notFoundList += inputScore(scoresTable[student].StuNum, scoresTable[student].Score, assignments, assignmentsSkipped);
     }
     if (notFoundList != "")
     {
-        window.alert(notFoundList)
+        window.alert("Skipped the following students: \n" + notFoundList)
     }
+}
+
+var isAssignmentEmpty = function(assignment) {
+    var empty = true;
+    var assignmentColumn = null;
+    var students = document.getElementsByClassName("assignments")[0].rows;
+    for (var j = 0; j < students[0].cells.length; j++) {
+        var readAssignment = students[0].cells[j].getAttribute("data-an");
+        if (readAssignment == assignment.trim()) {
+            assignmentColumn = j;
+        }
+    }
+    if (assignmentColumn == null) {
+        window.alert("Could not find assignment " + assignment + ". Skipping.")
+        return false;
+    }
+    for (var j = 0; j < students.length - 1; j++) {
+        if (students[j].cells[assignmentColumn].children[0].textContent != '' &&
+            students[j].cells[assignmentColumn].getAttribute("data-is-notapplicable") == "False") {
+            empty = false;
+        }
+    }
+    if (!empty) {
+        return window.confirm("Overwrite data in Assignment " + assignment + "?")
+    }
+    return true
 }
 
 window.addEventListener('message', function (event) {
