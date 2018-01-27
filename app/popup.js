@@ -43,8 +43,10 @@ function repackScores(scores, identType) {
                 	score.push(student[j].trim());
                 }
                 scoresObject[i] = 
-                    {Name: name,
-                        Score: score};
+                    {
+                        Name: name,
+                        Score: score
+                    };
             };
         };
     } else if (identType == 'StuFullName') {

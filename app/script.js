@@ -60,23 +60,27 @@ var createScoresTable = function (scores, identtype) {
         var roster = getRoster();
         var scoresTable = [];
         for ( var i in scores) {
-            var name = scores[i].Name;
-            var foundName = false;
-            for ( j in roster) {
-                var rosterName = roster[j].StuName.split(", ");
-                rosterName[1] = rosterName[1].split(" ")[0];
-                if ( name.includes(rosterName[0]) && name.includes(rosterName[1])) {
-                    scoresTable.push({ StuNum: roster[j].StuNum, Score: scores[i].Score });
-                    foundName = true;
-                    break;
-                }
-            }
-            if (!foundName) {
-                notFound += name;
-                notFound += ", Score: ";
-                notFound += scores[i].Score;
-                notFound += "\n";
-            }
+           var name = scores[i].Name;
+           var foundName = false;
+           for ( j in roster) {
+               var rosterName = roster[j].StuName.split(", ");
+               rosterName[1] = rosterName[1].split(" ")[0];
+               var rosterFullName = rosterName[1] + " " + rosterName[0];
+               if ( rosterFullName == name) {
+                   scoresTable.push({
+                       StuNum: roster[j].StuNum,
+                       Score: scores[i].Score
+                   });
+                   foundName = true;
+                   break;
+               }
+           }
+           if (!foundName) {
+               notFound += name;
+               notFound += ", Score: ";
+               notFound += scores[i].Score;
+               notFound += "\n";
+           }
         }
         if (notFound.length > 18) { window.alert(notFound) };
         return scoresTable;
@@ -165,7 +169,7 @@ var isAssignmentEmpty = function(assignment) {
         window.alert("Could not find assignment " + assignment + ". Skipping.")
         return false;
     }
-    for (var j = 0; j < students.length - 1; j++) {
+    for (var j = 0; j < students.length - 1; j++) { 
         if (students[j].cells[assignmentColumn].children[0].textContent != '' &&
             students[j].cells[assignmentColumn].getAttribute("data-is-notapplicable") == "False") {
             empty = false;
