@@ -140,11 +140,13 @@ var handleImport = function (scores, identType, assignments) {
     }
 
     //Trigger a click/tap event to get Aeries to update score database.
-    $("td[data-sn='" + scoresTable[0].StuNum.trim() + "']").filter("td[data-an='" + assignments[assignments.length-1].trim() + "']")[0].dispatchEvent(new MouseEvent("click", {
-        "view": window,
-        "bubbles": true,
-        "cancelable": false
-    }));
+    if (scoresTable[0]) {
+        $("td[data-sn='" + scoresTable[0].StuNum.trim() + "']").filter("td[data-an='" + assignments[assignments.length - 1].trim() + "']")[0].dispatchEvent(new MouseEvent("click", {
+            "view": window,
+            "bubbles": true,
+            "cancelable": false
+        }));
+    }
 
     if (notFoundList != "")
     {
