@@ -1,43 +1,25 @@
 var inputScore = function (StudentNumber, StudentScore, Assignments, Skip) {
-    //document.getElementsByClassName("assignments")[0].rows[0].cells[7].children[0].textContent = "100";
-    var lastColumnVisted = 0;
-    var lastRowVisited = 0;
+    var lastAssignment = Assignments[Assignments.length - 1];
     var foundName = false;
     var students = document.getElementsByClassName("assignments")[0].rows;
     for (var i = 0; i < Assignments.length; i++)
     {
         if (!Skip.includes(Assignments[i]))
         {
-            for (var row = 0; row < students.length; row++) {
-                if (students[row].getAttribute("data-sn") == StudentNumber) {
-                    foundName = true;
-                    var assignmentsList = students[row].cells;
-                    for (var an = 0; an < assignmentsList.length; an++) {
-                        if (assignmentsList[an].getAttribute("data-an") == Assignments[i].trim()) {
-                            assignmentsList[an].children[0].textContent = StudentScore[i];
-                            assignmentsList[an].dispatchEvent(new MouseEvent("click", {
-                                "view": window,
-                                "bubbles": true,
-                                "cancelable": false
-                            }));
-                            lastColumnVisted = an;
-                            lastRowVisited = row;
-                        }
-
-                    }
-                }
-
+            // TODO: to move trim function to popup.js
+            var assignmentCell = $("td[data-sn='" + StudentNumber.trim() + "']").filter("td[data-an='" + Assignments[i].trim() + "']");
+            if (assignmentCell) {
+                assignmentCell[0].children[0].textContent = StudentScore[i];
+                assignmentCell[0].dispatchEvent(new MouseEvent("click", {
+                    "view": window,
+                    "bubbles": true,
+                    "cancelable": false
+                }));
+                foundName = true;
+                lastAssignment = Assignments[i].trim();
             }
         }
     }
-
-    //Hacky nonsense to get Aeries to trigger their score updating
-    if (lastRowVisited == 0) lastRowVisited = 1;
-    students[lastRowVisited-1].cells[lastColumnVisted].dispatchEvent(new MouseEvent("click", {
-        "view": window,
-        "bubbles": true,
-        "cancelable": false
-    }));
 
     if (!foundName) {
         var notFound = "Student number: ";
@@ -64,9 +46,16 @@ var createScoresTable = function (scores, identtype) {
            var foundName = false;
            for ( j in roster) {
                var rosterName = roster[j].StuName.split(", ");
-               rosterName[1] = rosterName[1].split(" ")[0];
                var rosterFullName = rosterName[1] + " " + rosterName[0];
+               var rosterPartialName = rosterName[1].split(" ")[0] + " " + rosterName[0];
                if ( rosterFullName == name) {
+                   scoresTable.push({
+                       StuNum: roster[j].StuNum,
+                       Score: scores[i].Score
+                   });
+                   foundName = true;
+                   break;
+               } else if (rosterPartialName == name) {
                    scoresTable.push({
                        StuNum: roster[j].StuNum,
                        Score: scores[i].Score
@@ -91,10 +80,10 @@ var createScoresTable = function (scores, identtype) {
 
 var getRoster = function(){
     var StudentTable = {};
-    var students = document.getElementsByClassName("student-name-link");
+    var students = $(".student-name-link");
     for (var i = 0; i < students.length; i++) {
         StudentTable[i] = {
-            StuNum: getStudentNumber(students[i].textContent),
+            StuNum: getStudentNumber(students, students[i].textContent),
             StuName: students[i].textContent.toLowerCase()
         }
     }
@@ -103,9 +92,9 @@ var getRoster = function(){
 
 var repackRoster = function(){
     var StudentList = "";
-    var students = document.getElementsByClassName("student-name-link");
+    var students = $(".student-name-link");
     for (var i = 0; i < students.length; i++) {
-        StudentList += getStudentNumber(students[i].textContent);
+        StudentList += getStudentNumber(students, students[i].textContent);
         StudentList += "\t";
         StudentList += students[i].textContent;
         StudentList += "\n";
@@ -123,12 +112,12 @@ var repackRoster = function(){
 //    return lastName[0] + ", " + firstName[0];
 //}
 
-var getStudentNumber = function (studentName) {
-    var students = document.getElementsByClassName("students")[0].rows;
-    for (var row = 0; row < students.length; row++) {
-        if (students[row].cells[1].children[0].children[0].children[0].textContent.toLowerCase() == studentName.toLowerCase())
+var getStudentNumber = function (students, studentName) {
+    for (var i = 0; i < students.length; i++) {
+        if (students[i].textContent.toLowerCase() == studentName.toLowerCase())
         {
-            return students[row].attributes[1].value;
+            studentNumberLink = students[i].href.split('/');
+            return studentNumberLink[studentNumberLink.length - 1];
         }
     }
 }
@@ -149,6 +138,14 @@ var handleImport = function (scores, identType, assignments) {
     for (var student in scoresTable) {
         notFoundList += inputScore(scoresTable[student].StuNum, scoresTable[student].Score, assignments, assignmentsSkipped);
     }
+
+    //Trigger a click/tap event to get Aeries to update score database.
+    $("td[data-sn='" + scoresTable[0].StuNum.trim() + "']").filter("td[data-an='" + assignments[assignments.length-1].trim() + "']")[0].dispatchEvent(new MouseEvent("click", {
+        "view": window,
+        "bubbles": true,
+        "cancelable": false
+    }));
+
     if (notFoundList != "")
     {
         window.alert("Skipped the following students: \n" + notFoundList)
