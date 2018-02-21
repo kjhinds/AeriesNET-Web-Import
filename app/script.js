@@ -146,6 +146,12 @@ var handleImport = function (scores, identType, assignments) {
             "bubbles": true,
             "cancelable": false
         }));
+
+        $("td[data-an='" + assignments[assignments.length - 1].trim() + "']")[0].dispatchEvent(new MouseEvent("click", {
+            "view": window,
+            "bubbles": true,
+            "cancelable": false
+        }));
     }
 
     if (notFoundList != "")
