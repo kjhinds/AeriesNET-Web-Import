@@ -1,7 +1,7 @@
 var inputScore = function (StudentNumber, StudentScore, Assignments, Skip) {
-    var lastAssignment = Assignments[Assignments.length - 1];
+    //var lastAssignment = Assignments[Assignments.length - 1];
     var foundName = false;
-    var students = document.getElementsByClassName("assignments")[0].rows;
+    //var students = document.getElementsByClassName("assignments")[0].rows;
     for (var i = 0; i < Assignments.length; i++)
     {
         if (!Skip.includes(Assignments[i]))
@@ -16,7 +16,7 @@ var inputScore = function (StudentNumber, StudentScore, Assignments, Skip) {
                     "cancelable": false
                 }));
                 foundName = true;
-                lastAssignment = Assignments[i].trim();
+                //lastAssignment = Assignments[i].trim();
             }
         }
     }
@@ -34,6 +34,10 @@ var inputScore = function (StudentNumber, StudentScore, Assignments, Skip) {
     }
 };
 
+var checkIfContains = function(name){
+    return this.includes(name);
+}
+
 var createScoresTable = function (scores, identtype) {
     if(identtype == 'StuNum') {
         return scores;
@@ -48,21 +52,32 @@ var createScoresTable = function (scores, identtype) {
                var rosterName = roster[j].StuName.split(", ");
                var rosterFullName = rosterName[1] + " " + rosterName[0];
                var rosterPartialName = rosterName[1].split(" ")[0] + " " + rosterName[0];
-               if ( rosterFullName == name) {
+               if (rosterFullName == name) {
                    scoresTable.push({
                        StuNum: roster[j].StuNum,
                        Score: scores[i].Score
                    });
                    foundName = true;
                    break;
-               } else if (rosterPartialName == name) {
-                   scoresTable.push({
-                       StuNum: roster[j].StuNum,
-                       Score: scores[i].Score
-                   });
-                   foundName = true;
-                   break;
+               } else {
+                   var namePeices = name.split(" ");
+                   if (namePeices.every(checkIfContains, rosterFullName)) {
+                       scoresTable.push({
+                           StuNum: roster[j].StuNum,
+                           Score: scores[i].Score
+                       });
+                       foundName = true;
+                       break;
+                   }
                }
+               //} else if (rosterPartialName == name) {
+               //    scoresTable.push({
+               //        StuNum: roster[j].StuNum,
+               //        Score: scores[i].Score
+               //    });
+               //    foundName = true;
+               //    break;
+               //}
            }
            if (!foundName) {
                notFound += name;
@@ -189,7 +204,10 @@ var isAssignmentEmpty = function(assignment) {
 window.addEventListener('message', function (event) {
     if (event.origin != "https://teacherportal.abcusd.us") {
         return false;
+    } else if (typeof event.data.text === "undefined") {
+        return false;
     } else {
+        console.log(event)
         switch(event.data.text.command) {
             case "import":
                 handleImport(event.data.text.scores, event.data.text.identtype, event.data.text.assignments);
